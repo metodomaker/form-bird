@@ -1,8 +1,14 @@
 import { PrismaClient } from '@prisma/client'
 import { hash } from 'argon2'
-import dotenv from 'dotenv'
+import path from 'path'
+import * as dotenv from 'dotenv'
 
-dotenv.config()
+dotenv.config({
+  path: path.join(process.cwd(), '.env'),
+})
+
+if (!process.env.ADMINSTOR_MAIL) throw new Error('ADMINSTOR_MAIL is not set')
+if (!process.env.ADMINSTOR_PASS) throw new Error('ADMINSTOR_PASS is not set')
 
 const prisma = new PrismaClient()
 
