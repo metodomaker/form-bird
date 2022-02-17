@@ -59,6 +59,7 @@ model User {
   accounts      Account[]
   sessions      Session[]
   role          Role      @default(USER)
+  forms         Form[]
 
   @@map("users")
 }
@@ -85,6 +86,7 @@ model Form {
   id              String      @id @default(cuid())
   createdAt       DateTime    @default(now()) @map("created_at")
   updatedAt       DateTime    @updatedAt @map("updated_at")
+  userId          String      @map("user_id")
   name            String      @unique
   tags            TagsOnForm[]
   about           String?
@@ -92,6 +94,7 @@ model Form {
   actionName      String?     @default("logger") @map("action_name")
   schema          Json?
   records         FormRecord[]
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model TagsOnForm {

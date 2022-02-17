@@ -1,12 +1,15 @@
 import * as React from 'react'
-import { NextPage } from 'next'
+import { Heading, Flex } from '@chakra-ui/react'
 
-const Home: NextPage = () => {
+import CommonLayout from '@/layouts/common'
+
+export default function Home() {
   return (
-    <div>
-      <h1>Hello Next.js 👋</h1>
-    </div>
+    <CommonLayout>
+      <Flex h="500px" flexDir="column" align="center" justify="center">
+        <Heading>Don't invest</Heading>
+        <Heading>Just a random idea</Heading>
+      </Flex>
+    </CommonLayout>
   )
 }
-
-export default Home
