@@ -3,7 +3,7 @@ import { NextApiResponse } from 'next'
 // a set of functions to handle the response
 
 export function ok<T>(res: NextApiResponse, data: T) {
-  return res.status(200).json({ data })
+  return res.status(200).json(data)
 }
 
 export function error(res: NextApiResponse, message = 'Server Error') {
@@ -24,4 +24,8 @@ export function unauthorized(res: NextApiResponse, message = 'Unauthorized') {
 
 export function forbidden(res: NextApiResponse, message = 'Forbidden') {
   return res.status(403).end(message)
+}
+
+export function notAllow(res: NextApiResponse, message = 'Method Not Allowed') {
+  return res.status(405).end(message)
 }

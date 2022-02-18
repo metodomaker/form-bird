@@ -46,10 +46,14 @@ export type GetFormInput = {
 }
 
 export const getForm = async ({ id }: GetFormInput) => {
-  const form = await prisma.form.findUnique({
-    where: { id },
-  })
-  return form
+  try {
+    const form = await prisma.form.findUnique({
+      where: { id },
+    })
+    return form
+  } catch {
+    return null
+  }
 }
 
 // get form by user id, also support pagination and search by tag name

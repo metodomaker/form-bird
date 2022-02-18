@@ -16,11 +16,12 @@ export default async function handler(
 
   if (req.method === 'PUT') {
     const { variables } = req.body
+    variables.schema = JSON.parse(variables.schema)
     const form = await updateForm({ id: formId, variables })
-    return ok(res, { form })
+    return ok(res, form)
   }
   if (req.method === 'DELETE') {
-    const forms = await deleteForm({ id: formId })
-    return ok(res, { forms })
+    const form = await deleteForm({ id: formId })
+    return ok(res, form)
   }
 }

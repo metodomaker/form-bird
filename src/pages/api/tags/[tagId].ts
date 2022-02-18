@@ -17,10 +17,10 @@ export default async function handler(
   if (req.method === 'PUT') {
     const { variables } = req.body
     const tag = await updateTag({ id: parseInt(tagId), variables })
-    return ok(res, { tag })
+    return ok(res, tag)
   }
   if (req.method === 'DELETE') {
     const tag = await deleteTag({ id: parseInt(tagId) })
-    return ok(res, { tag })
+    return ok(res, tag)
   }
 }

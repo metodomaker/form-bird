@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 
-import { ok, unauthorized } from '@/utils/response'
+import { ok, notAllow, unauthorized } from '@/utils/response'
 import { useUser } from '@/utils/middlewares'
 
 import { createForm, getForms } from '@/controllers/forms'
@@ -13,17 +13,20 @@ export default async function handler(
   if (!user) return unauthorized(res)
 
   if (req.method === 'POST') {
-    const { variables } = req.body
+    const { variables } = JSON.parse(req.body)
+    variables.schema = JSON.parse(variables.schema)
     const form = await createForm({ userId: user.id, variables })
-    return ok(res, { form })
+    return ok(res, form)
   }
   if (req.method === 'GET') {
-    const { page, perPage } = req.query as Record<string, string | undefined>
+    const { q, page, perPage } = req.query as Record<string, string | undefined>
     const forms = await getForms({
       userId: user.id,
+      q,
       page: page ? parseInt(page) : 1,
       perPage: perPage ? parseInt(perPage) : 10,
     })
-    return ok(res, { forms })
+    return ok(res, forms)
   }
+  return notAllow(res)
 }

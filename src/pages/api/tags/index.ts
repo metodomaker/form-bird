@@ -15,7 +15,7 @@ export default async function handler(
   if (req.method === 'POST') {
     const { variables } = req.body
     const tag = await createTag({ variables })
-    return ok(res, { tag })
+    return ok(res, tag)
   }
   if (req.method === 'GET') {
     const { page, perPage } = req.query as Record<string, string | undefined>
@@ -23,6 +23,6 @@ export default async function handler(
       page: page ? parseInt(page) : 1,
       perPage: perPage ? parseInt(perPage) : 10,
     })
-    return ok(res, { tags })
+    return ok(res, tags)
   }
 }
