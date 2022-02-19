@@ -94,7 +94,7 @@ model Form {
   actionName      String?     @default("logger") @map("action_name")
   schema          Json?
   records         FormRecord[]
-  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user            User     @relation(fields: [userId], references: [id], onUpdate: NoAction, onDelete: Cascade)
 }
 
 model TagsOnForm {
