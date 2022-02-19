@@ -15,7 +15,7 @@ export default async function handler(
   const { formId } = req.query as Record<string, string>
 
   if (req.method === 'PUT') {
-    const { variables } = req.body
+    const { variables } = JSON.parse(req.body)
     variables.schema = JSON.parse(variables.schema)
     const form = await updateForm({ id: formId, variables })
     return ok(res, form)

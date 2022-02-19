@@ -1,33 +1,24 @@
-import useSWRInfinite from 'swr/infinite'
-import NextLink from 'next/link'
-import { useRouter } from 'next/router'
-import {
-  Heading,
-  Button,
-  Flex,
-  Text,
-  VStack,
-  LinkBox,
-  LinkOverlay,
-  Skeleton,
-  Icon,
-  Input,
-} from '@chakra-ui/react'
-import { FiInbox } from 'react-icons/fi'
-import { format } from 'date-fns'
 import * as React from 'react'
-import debounce from 'lodash/debounce'
+import dynamic from 'next/dynamic'
+import useSWRInfinite from 'swr/infinite'
+import { Box, Flex, Button, Heading, Skeleton } from '@chakra-ui/react'
 
 import fetcher from '@/utils/fetcher'
 
 import DashboardLayout from '@/layouts/dashboard'
 
+const FormList = dynamic(() => import('@/features/form/list'), { ssr: false })
+const FormListEmpty = dynamic(() => import('@/features/form/list/empty'), {
+  ssr: false,
+})
+const FormSearchInput = dynamic(() => import('@/features/form/search-input'), {
+  ssr: false,
+})
+
 const PAGE_SIZE = 10
 
 export default function DashboardForms() {
-  const router = useRouter()
-  const [inputQ, setInputQ] = React.useState('')
-  const [q, setQ] = React.useState(inputQ)
+  const [q, setQ] = React.useState('')
   const { data, error, mutate, size, setSize, isValidating } = useSWRInfinite(
     (pageIndex, previousPageData) => {
       if (previousPageData && !previousPageData.length) return null
@@ -47,106 +38,50 @@ export default function DashboardForms() {
   const isReachingEnd = size < PAGE_SIZE
   const isRefreshing = isValidating && data && data.length === size
 
-  const debouncedSearch = React.useRef(
-    debounce(async (value: string) => {
-      setQ(value)
-      await setSize(1)
-    }, 300)
-  ).current
-
-  const handleChange = React.useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      debouncedSearch(e.target.value)
-    },
-    []
-  )
-
-  const handleToCreate = () => {
-    router.push('/dashboard/forms/create')
+  const handleRefresh = async () => {
+    await mutate()
   }
 
-  React.useEffect(
-    () => () => {
-      debouncedSearch.cancel()
-    },
-    [debouncedSearch]
-  )
+  const handleSeach = React.useCallback(async (value: string) => {
+    setQ(value)
+    await setSize(1)
+  }, [])
+
+  const handleLoadMore = React.useCallback(async () => {
+    if (isReachingEnd) return
+    await setSize(size + 1)
+  }, [isReachingEnd, setSize, size])
 
   return (
     <DashboardLayout>
       <Heading mb={6}>Forms</Heading>
 
-      <Button
-        isLoading={isLoadingMore}
-        onClick={() => {
-          mutate()
-        }}
-      >
-        Refresh
-      </Button>
-
-      <Input
-        mb={4}
-        defaultValue=""
-        onChange={handleChange}
-        placeholder="Search forms by name"
-      />
+      <Flex mb={4} w="full" align="center">
+        <Box flex="auto" w="full" mr={2}>
+          <FormSearchInput onSearch={handleSeach} />
+        </Box>
+        <Box flex="none">
+          <Button
+            onClick={handleRefresh}
+            disabled={isLoadingMore}
+            isLoading={isRefreshing}
+          >
+            Refresh
+          </Button>
+        </Box>
+      </Flex>
 
       {isLoadingMore && <Skeleton w="full" h="60px" />}
-
-      {isEmpty && (
-        <Flex
-          w="full"
-          color="gray.500"
-          flexDir="column"
-          align="center"
-          justify="center"
-        >
-          <Icon as={FiInbox} mb={1} w={6} h={6} />
-          <Text mb={1} fontWeight="bold">
-            No Form Exist
-          </Text>
-          <Button size="sm" onClick={handleToCreate}>
-            Create One
-          </Button>
-        </Flex>
+      {isEmpty ? (
+        <FormListEmpty />
+      ) : (
+        <FormList
+          forms={forms}
+          isLoadingMore={isLoadingMore}
+          isReachingEnd={isReachingEnd}
+          handleLoadMore={handleLoadMore}
+        />
       )}
-
-      <VStack mb={4}>
-        {forms.map(form => (
-          <LinkBox
-            as={Flex}
-            key={form.id}
-            w="full"
-            h="60px"
-            flexDir="column"
-            justify="space-between"
-            textDecoration="none"
-            py={2}
-            px={4}
-            _hover={{ bg: 'gray.50' }}
-          >
-            <NextLink href={`/dashboard/forms/${form.id}`} passHref>
-              <LinkOverlay>
-                <Text>{form.name}</Text>
-              </LinkOverlay>
-            </NextLink>
-            <Text fontSize="sm" color="gray.400">
-              Updated at{' '}
-              {format(new Date(form.updatedAt), 'yyyy-MM-dd HH:mm:ss')}
-            </Text>
-          </LinkBox>
-        ))}
-      </VStack>
-
-      <Button
-        size="sm"
-        isLoading={isLoadingMore}
-        disabled={isLoadingMore || isReachingEnd}
-        onClick={() => setSize(size + 1)}
-      >
-        {isReachingEnd ? 'no more forms' : 'load more'}
-      </Button>
     </DashboardLayout>
   )
 }

@@ -4,8 +4,6 @@ import { ChakraProvider, localStorageManager } from '@chakra-ui/react'
 import type { NextPage } from 'next'
 import type { AppProps } from 'next/app'
 
-import AuthGuard from '@/components/auth-guard'
-
 export type NextApplicationPage<P = any, IP = P> = NextPage<P, IP> & {
   requireAuth?: boolean
 }
@@ -21,14 +19,7 @@ export default function MyApp({
   return (
     <SessionProvider session={session}>
       <ChakraProvider colorModeManager={localStorageManager}>
-        {Component.requireAuth ? (
-          <AuthGuard>
-            <Component {...pageProps} />
-          </AuthGuard>
-        ) : (
-          // public page
-          <Component {...pageProps} />
-        )}
+        <Component {...pageProps} />
       </ChakraProvider>
     </SessionProvider>
   )
